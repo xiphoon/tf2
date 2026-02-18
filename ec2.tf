@@ -8,13 +8,23 @@ data "aws_ami" "amazon_linux_2" {
   }
 }
 
-data "aws_subnets" "vpc_subnets" {
+# Lookup VPC by Name tag
+data "aws_vpc" "cmtr_vpc" {
   filter {
-    name   = "vpc-id"
+    name   = "tag:Name"
     values = ["cmtr-0iy36mkm-vpc"]
   }
 }
 
+# Get subnets inside that VPC
+data "aws_subnets" "vpc_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.cmtr_vpc.id]
+  }
+}
+
+# Lookup security group by name
 data "aws_security_group" "cmtr_sg" {
   filter {
     name   = "group-name"
