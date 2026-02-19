@@ -1,0 +1,7 @@
+aws_region               = "us-east-1"
+project                  = "cmtr-0iy36mkm"
+s3_bucket_name           = "cmtr-0iy36mkm-bucket-1771525408"
+iam_group_name           = "cmtr-0iy36mkm-iam-group"
+iam_policy_name          = "cmtr-0iy36mkm-iam-policy"
+iam_role_name            = "cmtr-0iy36mkm-iam-role"
+iam_instance_profile_name = "cmtr-0iy36mkm-iam-instance-profile"
