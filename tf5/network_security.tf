@@ -22,13 +22,13 @@ resource "aws_security_group" "private_http" {
 
 # Allow TCP 8080 from the public HTTP security group
 resource "aws_security_group_rule" "private_http_ingress_from_public_http" {
-  type                       = "ingress"
-  from_port                  = 8080
-  to_port                    = 8080
-  protocol                   = "tcp"
-  source_security_group_id   = aws_security_group.public_http.id
-  security_group_id          = aws_security_group.private_http.id
-  description                = "Allow HTTP 8080 from public HTTP SG"
+  type                     = "ingress"
+  from_port                = 8080
+  to_port                  = 8080
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.public_http.id
+  security_group_id        = aws_security_group.private_http.id
+  description              = "Allow HTTP 8080 from public HTTP SG"
 }
 
 # Allow ICMP from the public HTTP security group
