@@ -9,15 +9,6 @@ locals {
   }
 }
 
-# Look up instances so we can attach to their primary network interface
-data "aws_instance" "public_instance" {
-  instance_id = var.public_instance_id
-}
-
-data "aws_instance" "private_instance" {
-  instance_id = var.private_instance_id
-}
-
 #
 # SSH Security Group
 #
@@ -101,7 +92,7 @@ resource "aws_security_group_rule" "public_http_egress_all" {
 }
 
 #
-# Private HTTP Security Group (port 8080) - ingress from Public HTTP SG using source_security_group_id
+# Private HTTP Security Group (port 8080) - ingress from Public HTTP SG
 #
 resource "aws_security_group" "private_http" {
   name        = local.private_http_sg_name
@@ -142,25 +133,51 @@ resource "aws_security_group_rule" "private_http_egress_all" {
 }
 
 #
-# Attach security groups to instances using aws_network_interface_sg_attachment
-# (Attach SSH + Public HTTP to public instance; SSH + Private HTTP to private instance)
+# Network Interface Data Sources (primary interfaces)
+#
+data "aws_network_interface" "public_primary" {
+  filter {
+    name   = "attachment.instance-id"
+    values = [var.public_instance_id]
+  }
+
+  filter {
+    name   = "attachment.device-index"
+    values = ["0"]
+  }
+}
+
+data "aws_network_interface" "private_primary" {
+  filter {
+    name   = "attachment.instance-id"
+    values = [var.private_instance_id]
+  }
+
+  filter {
+    name   = "attachment.device-index"
+    values = ["0"]
+  }
+}
+
+#
+# Attach security groups to EC2 instances
 #
 resource "aws_network_interface_sg_attachment" "public_attach_ssh" {
-  network_interface_id = data.aws_instance.public_instance.network_interface[0].network_interface_id
+  network_interface_id = data.aws_network_interface.public_primary.id
   security_group_id    = aws_security_group.ssh.id
 }
 
 resource "aws_network_interface_sg_attachment" "public_attach_http" {
-  network_interface_id = data.aws_instance.public_instance.network_interface[0].network_interface_id
+  network_interface_id = data.aws_network_interface.public_primary.id
   security_group_id    = aws_security_group.public_http.id
 }
 
 resource "aws_network_interface_sg_attachment" "private_attach_ssh" {
-  network_interface_id = data.aws_instance.private_instance.network_interface[0].network_interface_id
+  network_interface_id = data.aws_network_interface.private_primary.id
   security_group_id    = aws_security_group.ssh.id
 }
 
 resource "aws_network_interface_sg_attachment" "private_attach_private_http" {
-  network_interface_id = data.aws_instance.private_instance.network_interface[0].network_interface_id
+  network_interface_id = data.aws_network_interface.private_primary.id
   security_group_id    = aws_security_group.private_http.id
 }
