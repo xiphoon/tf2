@@ -19,49 +19,49 @@ variable "vpc_name" {
 }
 
 variable "vpc_cidr" {
-  description = "CIDR block for the VPC (example: 10.0.0.0/16)."
+  description = "CIDR block for the VPC."
   type        = string
 }
 
-# Subnet 1
+# Public subnet A
 variable "subnet1_name" {
-  description = "Name tag for public subnet 1."
+  description = "Name tag for public subnet A."
   type        = string
 }
 variable "subnet1_cidr" {
-  description = "CIDR block for public subnet 1."
+  description = "CIDR block for public subnet A."
   type        = string
 }
 variable "availability_zone1" {
-  description = "Availability Zone for public subnet 1 (example: us-east-1a)."
+  description = "Availability Zone for public subnet A."
   type        = string
 }
 
-# Subnet 2
+# Public subnet B
 variable "subnet2_name" {
-  description = "Name tag for public subnet 2."
+  description = "Name tag for public subnet B."
   type        = string
 }
 variable "subnet2_cidr" {
-  description = "CIDR block for public subnet 2."
+  description = "CIDR block for public subnet B."
   type        = string
 }
 variable "availability_zone2" {
-  description = "Availability Zone for public subnet 2 (example: us-east-1b)."
+  description = "Availability Zone for public subnet B."
   type        = string
 }
 
-# Subnet 3
+# Public subnet C
 variable "subnet3_name" {
-  description = "Name tag for public subnet 3."
+  description = "Name tag for public subnet C."
   type        = string
 }
 variable "subnet3_cidr" {
-  description = "CIDR block for public subnet 3."
+  description = "CIDR block for public subnet C."
   type        = string
 }
 variable "availability_zone3" {
-  description = "Availability Zone for public subnet 3 (example: us-east-1c)."
+  description = "Availability Zone for public subnet C."
   type        = string
 }
 
