@@ -1,7 +1,7 @@
 locals {
   # Names are generated using project_id to avoid hardcoding
-  ssh_sg_name         = "${var.project_id}-ssh-sg"
-  public_http_sg_name = "${var.project_id}-public-http-sg"
+  ssh_sg_name          = "${var.project_id}-ssh-sg"
+  public_http_sg_name  = "${var.project_id}-public-http-sg"
   private_http_sg_name = "${var.project_id}-private-http-sg"
 
   tags = {
@@ -112,23 +112,23 @@ resource "aws_security_group" "private_http" {
 }
 
 resource "aws_security_group_rule" "private_http_ingress_from_public_http" {
-  description               = "Allow HTTP (8080) from public HTTP security group"
-  type                      = "ingress"
-  from_port                 = 8080
-  to_port                   = 8080
-  protocol                  = "tcp"
-  source_security_group_id  = aws_security_group.public_http.id
-  security_group_id         = aws_security_group.private_http.id
+  description              = "Allow HTTP (8080) from public HTTP security group"
+  type                     = "ingress"
+  from_port                = 8080
+  to_port                  = 8080
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.public_http.id
+  security_group_id        = aws_security_group.private_http.id
 }
 
 resource "aws_security_group_rule" "private_http_ingress_icmp_from_public" {
-  description               = "Allow ICMP from public HTTP security group"
-  type                      = "ingress"
-  from_port                 = -1
-  to_port                   = -1
-  protocol                  = "icmp"
-  source_security_group_id  = aws_security_group.public_http.id
-  security_group_id         = aws_security_group.private_http.id
+  description              = "Allow ICMP from public HTTP security group"
+  type                     = "ingress"
+  from_port                = -1
+  to_port                  = -1
+  protocol                 = "icmp"
+  source_security_group_id = aws_security_group.public_http.id
+  security_group_id        = aws_security_group.private_http.id
 }
 
 resource "aws_security_group_rule" "private_http_egress_all" {
