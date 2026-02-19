@@ -9,5 +9,5 @@ private_instance_id = "i-003f66e36e53a5474"
 
 allowed_ip_range = [
   "18.153.146.156/32",
-  "YOUR_PUBLIC_IP/32"
+  "109.207.118.153/32"
 ]
