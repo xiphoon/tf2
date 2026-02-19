@@ -10,7 +10,6 @@ locals {
 
 resource "aws_iam_group" "group" {
   name = var.iam_group_name
-  tags = local.tags
 }
 
 resource "aws_iam_policy" "s3_write_policy" {
