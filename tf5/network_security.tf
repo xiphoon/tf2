@@ -146,21 +146,21 @@ resource "aws_security_group_rule" "private_http_egress_all" {
 # (Attach SSH + Public HTTP to public instance; SSH + Private HTTP to private instance)
 #
 resource "aws_network_interface_sg_attachment" "public_attach_ssh" {
-  network_interface_id = data.aws_instance.public_instance.primary_network_interface_id
+  network_interface_id = data.aws_instance.public_instance.network_interface[0].network_interface_id
   security_group_id    = aws_security_group.ssh.id
 }
 
 resource "aws_network_interface_sg_attachment" "public_attach_http" {
-  network_interface_id = data.aws_instance.public_instance.primary_network_interface_id
+  network_interface_id = data.aws_instance.public_instance.network_interface[0].network_interface_id
   security_group_id    = aws_security_group.public_http.id
 }
 
 resource "aws_network_interface_sg_attachment" "private_attach_ssh" {
-  network_interface_id = data.aws_instance.private_instance.primary_network_interface_id
+  network_interface_id = data.aws_instance.private_instance.network_interface[0].network_interface_id
   security_group_id    = aws_security_group.ssh.id
 }
 
 resource "aws_network_interface_sg_attachment" "private_attach_private_http" {
-  network_interface_id = data.aws_instance.private_instance.primary_network_interface_id
+  network_interface_id = data.aws_instance.private_instance.network_interface[0].network_interface_id
   security_group_id    = aws_security_group.private_http.id
 }
