@@ -40,11 +40,6 @@ data "aws_ami" "amazon_linux_2023" {
 
   filter {
     name   = "name"
-    values = ["amazon-linux-2023*"]
-  }
-
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
+    values = ["amazon-linux-2023-hvm-*-x86_64-*"]
   }
 }
