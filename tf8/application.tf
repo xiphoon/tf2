@@ -211,7 +211,7 @@ resource "aws_autoscaling_group" "cmtr_asg" {
 
   tags = merge(local.common_tags, { "Name" = "${local.name_prefix}-asg" })
 }
-
+}
 # Attach ASG to the ALB target group using autoscaling attachment resource
 resource "aws_autoscaling_attachment" "asg_tg_attach" {
   autoscaling_group_name = aws_autoscaling_group.cmtr_asg.name
