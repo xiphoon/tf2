@@ -186,7 +186,7 @@ resource "aws_autoscaling_group" "cmtr_asg" {
   desired_capacity    = 2
   min_size            = 1
   max_size            = 2
-  vpc_zone_identifier = var.public_subnet_ids  # ✅ Changed to public subnets
+  vpc_zone_identifier = var.public_subnet_ids # ✅ Changed to public subnets
 
   health_check_type         = "ELB"
   health_check_grace_period = 120
