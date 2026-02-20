@@ -28,6 +28,6 @@ resource "aws_instance" "web" {
     Terraform = "true"
     Project   = var.project_id
     # helpful name for identification
-    Name      = "${var.project_id}-instance"
+    Name = "${var.project_id}-instance"
   }
 }
