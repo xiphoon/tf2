@@ -200,16 +200,16 @@ resource "aws_autoscaling_group" "cmtr_asg" {
   }
 }
 
-  # Attach via separate attachment resource below (ignore_changes required per task)
-  lifecycle {
-    ignore_changes = [
-      # ignore ASG changes to Load Balancer and target group ARNs
-      target_group_arns,
-      load_balancers,
-    ]
-  }
+# Attach via separate attachment resource below (ignore_changes required per task)
+lifecycle {
+  ignore_changes = [
+    # ignore ASG changes to Load Balancer and target group ARNs
+    target_group_arns,
+    load_balancers,
+  ]
+}
 
-  tags = merge(local.common_tags, { "Name" = "${local.name_prefix}-asg" })
+tags = merge(local.common_tags, { "Name" = "${local.name_prefix}-asg" })
 
 # Attach ASG to the ALB target group using autoscaling attachment resource
 resource "aws_autoscaling_attachment" "asg_tg_attach" {
