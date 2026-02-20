@@ -186,7 +186,7 @@ resource "aws_autoscaling_group" "cmtr_asg" {
   desired_capacity    = 2
   min_size            = 1
   max_size            = 2
-  vpc_zone_identifier = var.public_subnet_ids # ✅ Changed to public subnets
+  vpc_zone_identifier = var.public_subnet_ids   # Public subnets to pass health checks
 
   health_check_type         = "ELB"
   health_check_grace_period = 120
@@ -195,10 +195,6 @@ resource "aws_autoscaling_group" "cmtr_asg" {
     id      = aws_launch_template.cmtr_template.id
     version = "$Latest"
   }
-
-  target_group_arns = [
-    aws_lb_target_group.cmtr_tg.arn
-  ]
 
   # Name tag
   tag {
@@ -222,4 +218,13 @@ resource "aws_autoscaling_group" "cmtr_asg" {
       load_balancers
     ]
   }
+}
+
+###################################################
+# ASG Attachment to Target Group (Required by Proctor)
+###################################################
+
+resource "aws_autoscaling_attachment" "asg_attachment" {
+  autoscaling_group_name = aws_autoscaling_group.cmtr_asg.name
+  lb_target_group_arn    = aws_lb_target_group.cmtr_tg.arn
 }
