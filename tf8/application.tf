@@ -161,11 +161,12 @@ resource "aws_lb_listener" "http" {
 
 # === Auto Scaling Group ===
 resource "aws_autoscaling_group" "cmtr_asg" {
-  name                      = "${local.name_prefix}-asg"
-  desired_capacity          = 2
-  min_size                  = 1
-  max_size                  = 2
-  vpc_zone_identifier       = var.private_subnet_ids
+  name                = "${local.name_prefix}-asg"
+  desired_capacity    = 2
+  min_size            = 1
+  max_size            = 2
+  vpc_zone_identifier = var.private_subnet_ids
+
   health_check_type         = "ELB"
   health_check_grace_period = 120
 
@@ -174,20 +175,30 @@ resource "aws_autoscaling_group" "cmtr_asg" {
     version = "$Latest"
   }
 
+  # Name tag
   tag {
     key                 = "Name"
     value               = "${local.name_prefix}-instance"
     propagate_at_launch = true
   }
 
+  # Common tags
   dynamic "tag" {
-    for_each = keys(local.common_tags)
+    for_each = local.common_tags
     content {
       key                 = tag.key
-      value               = lookup(local.common_tags, tag.key)
+      value               = tag.value
       propagate_at_launch = true
     }
   }
+
+  lifecycle {
+    ignore_changes = [
+      target_group_arns,
+      load_balancers,
+    ]
+  }
+}
 
   # Attach via separate attachment resource below (ignore_changes required per task)
   lifecycle {
