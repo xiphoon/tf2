@@ -104,7 +104,7 @@ aws s3 cp "$${INFO_FILE}" \
 --only-show-errors || true
 
 EOF
-)
+  )
 
   tag_specifications {
     resource_type = "instance"
