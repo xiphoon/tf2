@@ -29,7 +29,7 @@ data "aws_security_group" "sglb" {
 resource "aws_launch_template" "cmtr_template" {
   name_prefix   = "${local.name_prefix}-template-"
   name          = "${local.name_prefix}-template" # generated via locals + required name
-  image_id      = var.ami_id                    # ami-09e6f87a47903347c (set in variables.tf/terraform.tfvars)
+  image_id      = var.ami_id                      # ami-09e6f87a47903347c (set in variables.tf/terraform.tfvars)
   instance_type = "t3.micro"
   key_name      = var.ssh_key_name
 
@@ -41,7 +41,7 @@ resource "aws_launch_template" "cmtr_template" {
   network_interfaces {
     device_index          = 0
     delete_on_termination = true
-    security_groups       = [
+    security_groups = [
       data.aws_security_group.ec2_sg.id,
       data.aws_security_group.http_sg.id
     ]
@@ -118,21 +118,21 @@ This message was generated on instance ${INSTANCE_ID} with the following IP: ${P
 
 # === Application Load Balancer ===
 resource "aws_lb" "cmtr_alb" {
-  name               = "${local.name_prefix}-loadbalancer"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [ data.aws_security_group.sglb.id ]
-  subnets            = var.public_subnet_ids
+  name                       = "${local.name_prefix}-loadbalancer"
+  internal                   = false
+  load_balancer_type         = "application"
+  security_groups            = [data.aws_security_group.sglb.id]
+  subnets                    = var.public_subnet_ids
   enable_deletion_protection = false
 
   tags = merge(local.common_tags, { Name = "${local.name_prefix}-alb" })
 }
 
 resource "aws_lb_target_group" "cmtr_tg" {
-  name     = "${local.name_prefix}-tg"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = var.vpc_id
+  name        = "${local.name_prefix}-tg"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = var.vpc_id
   target_type = "instance"
   health_check {
     path                = "/"
@@ -203,7 +203,7 @@ resource "aws_autoscaling_group" "cmtr_asg" {
 # Attach ASG to the ALB target group using autoscaling attachment resource
 resource "aws_autoscaling_attachment" "asg_tg_attach" {
   autoscaling_group_name = aws_autoscaling_group.cmtr_asg.name
-  alb_target_group_arns  = [ aws_lb_target_group.cmtr_tg.arn ]
+  alb_target_group_arns  = [aws_lb_target_group.cmtr_tg.arn]
 }
 
 # (Optional) If you also needed to attach a classic ELB it would be:
