@@ -10,18 +10,17 @@ data "aws_vpc" "selected" {
   }
 }
 
-# Find subnet ids in the VPC that match the public subnet name tag
-data "aws_subnet_ids" "public" {
-  vpc_id = data.aws_vpc.selected.id
-
-  tags = {
-    Name = var.public_subnet_name
-  }
-}
-
-# Select the first matching subnet (should be the public subnet provided)
+# Find public subnet directly by name tag and VPC
 data "aws_subnet" "public" {
-  id = element(data.aws_subnet_ids.public.ids, 0)
+  filter {
+    name   = "tag:Name"
+    values = [var.public_subnet_name]
+  }
+
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.selected.id]
+  }
 }
 
 # Find security group by Name tag within the discovered VPC
