@@ -1,18 +1,20 @@
 ###################################################
 # application.tf
-# Defines launch template, autoscaling group, ALB, and attachment
-# Assumes provider + versions are defined elsewhere (versions.tf / main.tf)
 ###################################################
 
 locals {
   name_prefix = "cmtr-0iy36mkm"
+
   common_tags = {
     Terraform = "true"
     Project   = local.name_prefix
   }
 }
 
-# === Data sources for pre-provisioned resources ===
+###################################################
+# Data Sources (Pre-Provisioned Resources)
+###################################################
+
 data "aws_security_group" "ec2_sg" {
   name = "${local.name_prefix}-ec2_sg"
 }
@@ -25,18 +27,20 @@ data "aws_security_group" "sglb" {
   name = "${local.name_prefix}-sglb"
 }
 
-# === Launch Template ===
+###################################################
+# Launch Template
+###################################################
+
 resource "aws_launch_template" "cmtr_template" {
-  name          = "${local.name_prefix}-template" # generated via locals + required name
-  image_id      = var.ami_id                      # ami-09e6f87a47903347c (set in variables.tf/terraform.tfvars)
+  name          = "${local.name_prefix}-template"
+  image_id      = var.ami_id
   instance_type = "t3.micro"
   key_name      = var.ssh_key_name
 
   iam_instance_profile {
-    name = "${local.name_prefix}-instance_profile" # pre-provisioned profile name
+    name = "${local.name_prefix}-instance_profile"
   }
 
-  # Network interfaces: attach and ensure delete_on_termination = true
   network_interfaces {
     device_index          = 0
     delete_on_termination = true
@@ -44,7 +48,6 @@ resource "aws_launch_template" "cmtr_template" {
       data.aws_security_group.ec2_sg.id,
       data.aws_security_group.http_sg.id
     ]
-    # associate_public_ip_address can be controlled through var if needed. Leave default (false) unless specified.
   }
 
   metadata_options {
@@ -56,7 +59,7 @@ resource "aws_launch_template" "cmtr_template" {
 #!/bin/bash
 set -euo pipefail
 
-# Update & install packages
+# Install packages
 if command -v yum >/dev/null 2>&1; then
   yum update -y
   yum install -y aws-cli httpd jq
@@ -69,7 +72,7 @@ elif command -v apt-get >/dev/null 2>&1; then
   systemctl start apache2
 fi
 
-# Get IMDSv2 token
+# IMDSv2 token
 TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" \
   -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
 
@@ -77,13 +80,12 @@ INSTANCE_ID=$(curl -s -H "X-aws-ec2-metadata-token: $${TOKEN}" \
   http://169.254.169.254/latest/meta-data/instance-id)
 
 PRIVATE_IP=$(curl -s -H "X-aws-ec2-metadata-token: $${TOKEN}" \
-  http://169.254.169.254/latest/meta-data/local-ipv4 || true)
+  http://169.254.169.254/latest/meta-data/local-ipv4)
 
-# Create HTML page
+# Create webpage
 cat > /var/www/html/index.html <<HTML
 <!doctype html>
 <html>
-  <head><title>Instance Info</title></head>
   <body>
     <pre>
 This message was generated on instance $${INSTANCE_ID} with the following IP: $${PRIVATE_IP}
@@ -107,37 +109,49 @@ EOF
 
   tag_specifications {
     resource_type = "instance"
-    tags          = merge(local.common_tags, { Name = "${local.name_prefix}-instance" })
+
+    tags = merge(
+      local.common_tags,
+      { Name = "${local.name_prefix}-instance" }
+    )
   }
 
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  tags = merge(local.common_tags, { Name = "${local.name_prefix}-launch-template" })
+  tags = merge(
+    local.common_tags,
+    { Name = "${local.name_prefix}-launch-template" }
+  )
 }
 
-# === Application Load Balancer ===
+###################################################
+# Application Load Balancer
+###################################################
+
 resource "aws_lb" "cmtr_alb" {
-  name                       = "${local.name_prefix}-loadbalancer"
-  internal                   = false
-  load_balancer_type         = "application"
-  security_groups            = [data.aws_security_group.sglb.id]
-  subnets                    = var.public_subnet_ids
-  enable_deletion_protection = false
+  name               = "${local.name_prefix}-loadbalancer"
+  load_balancer_type = "application"
+  internal           = false
+  security_groups    = [data.aws_security_group.sglb.id]
+  subnets            = var.public_subnet_ids
 
-  tags = merge(local.common_tags, { Name = "${local.name_prefix}-alb" })
+  tags = merge(
+    local.common_tags,
+    { Name = "${local.name_prefix}-alb" }
+  )
 }
+
+###################################################
+# Target Group
+###################################################
 
 resource "aws_lb_target_group" "cmtr_tg" {
   name        = "${local.name_prefix}-tg"
   port        = 80
   protocol    = "HTTP"
-  vpc_id      = var.vpc_id
   target_type = "instance"
+  vpc_id      = var.vpc_id
+
   health_check {
     path                = "/"
-    protocol            = "HTTP"
     matcher             = "200-399"
     interval            = 30
     healthy_threshold   = 2
@@ -148,9 +162,13 @@ resource "aws_lb_target_group" "cmtr_tg" {
   tags = local.common_tags
 }
 
-resource "aws_lb_listener" "http" {
+###################################################
+# Listener
+###################################################
+
+resource "aws_lb_listener" "http_listener" {
   load_balancer_arn = aws_lb.cmtr_alb.arn
-  port              = "80"
+  port              = 80
   protocol          = "HTTP"
 
   default_action {
@@ -159,7 +177,10 @@ resource "aws_lb_listener" "http" {
   }
 }
 
-# === Auto Scaling Group ===
+###################################################
+# Auto Scaling Group
+###################################################
+
 resource "aws_autoscaling_group" "cmtr_asg" {
   name                = "${local.name_prefix}-asg"
   desired_capacity    = 2
@@ -182,7 +203,7 @@ resource "aws_autoscaling_group" "cmtr_asg" {
     propagate_at_launch = true
   }
 
-  # Common tags
+  # Required common tags
   dynamic "tag" {
     for_each = local.common_tags
     content {
@@ -195,31 +216,16 @@ resource "aws_autoscaling_group" "cmtr_asg" {
   lifecycle {
     ignore_changes = [
       target_group_arns,
-      load_balancers,
+      load_balancers
     ]
   }
 }
 
-# Attach via separate attachment resource below (ignore_changes required per task)
-lifecycle {
-  ignore_changes = [
-    # ignore ASG changes to Load Balancer and target group ARNs
-    target_group_arns,
-    load_balancers,
-  ]
-}
+###################################################
+# ASG Attachment to Target Group
+###################################################
 
-tags = merge(local.common_tags, { "Name" = "${local.name_prefix}-asg" })
-
-# Attach ASG to the ALB target group using autoscaling attachment resource
-resource "aws_autoscaling_attachment" "asg_tg_attach" {
+resource "aws_autoscaling_attachment" "asg_attachment" {
   autoscaling_group_name = aws_autoscaling_group.cmtr_asg.name
-  alb_target_group_arns  = [aws_lb_target_group.cmtr_tg.arn]
+  alb_target_group_arn   = aws_lb_target_group.cmtr_tg.arn
 }
-
-# (Optional) If you also needed to attach a classic ELB it would be:
-# elb = aws_elb.classic_elb.id
-
-# === Outputs are intentionally omitted from this file (place outputs in outputs.tf) ===
-
-# End of application.tf
