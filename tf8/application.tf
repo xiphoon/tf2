@@ -227,5 +227,5 @@ resource "aws_autoscaling_group" "cmtr_asg" {
 
 resource "aws_autoscaling_attachment" "asg_attachment" {
   autoscaling_group_name = aws_autoscaling_group.cmtr_asg.name
-  alb_target_group_arn   = aws_lb_target_group.cmtr_tg.arn
+  lb_target_group_arn    = aws_lb_target_group.cmtr_tg.arn
 }
