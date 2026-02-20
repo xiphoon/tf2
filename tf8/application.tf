@@ -12,7 +12,7 @@ locals {
 }
 
 ###################################################
-# Data Sources (Pre-Provisioned Resources)
+# Data Sources (Pre-Provisioned Security Groups)
 ###################################################
 
 data "aws_security_group" "ec2_sg" {
@@ -59,7 +59,7 @@ resource "aws_launch_template" "cmtr_template" {
 #!/bin/bash
 set -euo pipefail
 
-# Install packages
+# Update & install packages
 if command -v yum >/dev/null 2>&1; then
   yum update -y
   yum install -y aws-cli httpd jq
@@ -186,7 +186,7 @@ resource "aws_autoscaling_group" "cmtr_asg" {
   desired_capacity    = 2
   min_size            = 1
   max_size            = 2
-  vpc_zone_identifier = var.private_subnet_ids
+  vpc_zone_identifier = var.public_subnet_ids  # ✅ Changed to public subnets
 
   health_check_type         = "ELB"
   health_check_grace_period = 120
@@ -196,6 +196,10 @@ resource "aws_autoscaling_group" "cmtr_asg" {
     version = "$Latest"
   }
 
+  target_group_arns = [
+    aws_lb_target_group.cmtr_tg.arn
+  ]
+
   # Name tag
   tag {
     key                 = "Name"
@@ -203,7 +207,7 @@ resource "aws_autoscaling_group" "cmtr_asg" {
     propagate_at_launch = true
   }
 
-  # Required common tags
+  # Common tags
   dynamic "tag" {
     for_each = local.common_tags
     content {
@@ -215,17 +219,7 @@ resource "aws_autoscaling_group" "cmtr_asg" {
 
   lifecycle {
     ignore_changes = [
-      target_group_arns,
       load_balancers
     ]
   }
-}
-
-###################################################
-# ASG Attachment to Target Group
-###################################################
-
-resource "aws_autoscaling_attachment" "asg_attachment" {
-  autoscaling_group_name = aws_autoscaling_group.cmtr_asg.name
-  lb_target_group_arn    = aws_lb_target_group.cmtr_tg.arn
 }
