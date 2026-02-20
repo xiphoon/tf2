@@ -38,8 +38,11 @@ data "aws_ami" "amazon_linux_2023" {
   most_recent = true
   owners      = ["amazon"]
 
+  # Match Amazon Linux 2023 HVM x86_64 images
   filter {
     name   = "name"
-    values = ["amazon-linux-2023-hvm-*-x86_64-*"]
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"] # safer pattern
   }
+
+  # Remove architecture filter; it's already x86_64 in the name
 }
