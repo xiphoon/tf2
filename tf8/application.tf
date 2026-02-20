@@ -27,7 +27,6 @@ data "aws_security_group" "sglb" {
 
 # === Launch Template ===
 resource "aws_launch_template" "cmtr_template" {
-  name_prefix   = "${local.name_prefix}-template-"
   name          = "${local.name_prefix}-template" # generated via locals + required name
   image_id      = var.ami_id                      # ami-09e6f87a47903347c (set in variables.tf/terraform.tfvars)
   instance_type = "t3.micro"
