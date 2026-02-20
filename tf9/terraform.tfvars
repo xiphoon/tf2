@@ -1,0 +1,6 @@
+aws_region          = "us-east-1"
+project_id          = "cmtr-0iy36mkm"
+vpc_name            = "cmtr-0iy36mkm-vpc"
+public_subnet_name  = "cmtr-0iy36mkm-public-subnet-1"
+security_group_name = "cmtr-0iy36mkm-sg"
+instance_type       = "t3.micro"
