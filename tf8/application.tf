@@ -54,55 +54,57 @@ resource "aws_launch_template" "cmtr_template" {
   }
 
   user_data = base64encode(<<-EOF
-    #!/bin/bash
-    set -euo pipefail
-    # update packages and install utilities
-    if command -v yum >/dev/null 2>&1; then
-      yum update -y
-      yum install -y aws-cli httpd jq
-      systemctl enable httpd
-      systemctl start httpd
-    elif command -v apt-get >/dev/null 2>&1; then
-      apt-get update -y
-      DEBIAN_FRONTEND=noninteractive apt-get install -y awscli apache2 jq
-      systemctl enable apache2
-      systemctl start apache2
-    fi
+#!/bin/bash
+set -euo pipefail
 
-    # Use IMDSv2 to fetch instance metadata securely
-    TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
-    INSTANCE_ID=$(curl -s -H "X-aws-ec2-metadata-token: ${TOKEN}" http://169.254.169.254/latest/meta-data/instance-id)
-    PRIVATE_IP=$(curl -s -H "X-aws-ec2-metadata-token: ${TOKEN}" http://169.254.169.254/latest/meta-data/local-ipv4 || true)
+# Update & install packages
+if command -v yum >/dev/null 2>&1; then
+  yum update -y
+  yum install -y aws-cli httpd jq
+  systemctl enable httpd
+  systemctl start httpd
+elif command -v apt-get >/dev/null 2>&1; then
+  apt-get update -y
+  DEBIAN_FRONTEND=noninteractive apt-get install -y awscli apache2 jq
+  systemctl enable apache2
+  systemctl start apache2
+fi
 
-    # Write simple HTML page
-    mkdir -p /var/www/html
-    cat > /var/www/html/index.html <<HTML
-    <!doctype html>
-    <html>
-      <head><title>Instance Info</title></head>
-      <body>
-        <pre>
-This message was generated on instance ${INSTANCE_ID} with the following IP: ${PRIVATE_IP}
-        </pre>
-      </body>
-    </html>
-    HTML
+# Get IMDSv2 token
+TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" \
+  -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
 
-    # Create an info file and upload to S3 (bucket must be provided via var/output_bucket_name)
-    INFO_FILE="/tmp/${INSTANCE_ID}.txt"
-    echo "instance_id=${INSTANCE_ID}" > ${INFO_FILE}
-    echo "private_ip=${PRIVATE_IP}" >> ${INFO_FILE}
-    echo "generated_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> ${INFO_FILE}
+INSTANCE_ID=$(curl -s -H "X-aws-ec2-metadata-token: $${TOKEN}" \
+  http://169.254.169.254/latest/meta-data/instance-id)
 
-    # Attempt upload — instance role must allow PutObject to the bucket
-    if [ -n "${var.output_bucket_name}" ]; then
-      aws s3 cp "${INFO_FILE}" "s3://${var.output_bucket_name}/${local.name_prefix}/${INSTANCE_ID}.txt" --only-show-errors || true
-    fi
+PRIVATE_IP=$(curl -s -H "X-aws-ec2-metadata-token: $${TOKEN}" \
+  http://169.254.169.254/latest/meta-data/local-ipv4 || true)
 
-    # Ensure permissions
-    chown -R apache:apache /var/www/html || chown -R www-data:www-data /var/www/html || true
-  EOF
-  )
+# Create HTML page
+cat > /var/www/html/index.html <<HTML
+<!doctype html>
+<html>
+  <head><title>Instance Info</title></head>
+  <body>
+    <pre>
+This message was generated on instance $${INSTANCE_ID} with the following IP: $${PRIVATE_IP}
+    </pre>
+  </body>
+</html>
+HTML
+
+INFO_FILE="/tmp/$${INSTANCE_ID}.txt"
+
+echo "instance_id=$${INSTANCE_ID}" > $${INFO_FILE}
+echo "private_ip=$${PRIVATE_IP}" >> $${INFO_FILE}
+echo "generated_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $${INFO_FILE}
+
+aws s3 cp "$${INFO_FILE}" \
+"s3://${var.output_bucket_name}/${local.name_prefix}/$${INSTANCE_ID}.txt" \
+--only-show-errors || true
+
+EOF
+)
 
   tag_specifications {
     resource_type = "instance"
