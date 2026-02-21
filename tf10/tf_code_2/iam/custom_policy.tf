@@ -5,7 +5,7 @@ resource "aws_iam_policy" "custom_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid = "AllowS3List"
+        Sid    = "AllowS3List"
         Effect = "Allow"
         Action = [
           "s3:ListBucket",
