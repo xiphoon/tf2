@@ -24,7 +24,7 @@ sg_http_id = "sg-00e00d861b72f41a6"
 sg_ssh_id = "sg-00e00d861b72f41a6"
 
 # AMI (use Amazon Linux 2023 or Amazon Linux 2 in your region)
-ami_id = "ami-0123456789abcdef0"
+ami_id = "ami-0f3caa1cf4417e51b"
 
 # Optional SSH key (leave empty if not required)
 key_name = ""
