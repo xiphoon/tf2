@@ -57,11 +57,4 @@ elif command -v apt-get >/dev/null 2>&1; then
   echo "<html><body><h1>Green Environment</h1></body></html>" > /var/www/html/index.html
   systemctl start apache2
 fi
-EOF
-  )
-
-  tag_specifications {
-    resource_type = "instance"
-    tags          = merge(local.common_tags, { Name = local.green_lt_name })
-  }
 }
