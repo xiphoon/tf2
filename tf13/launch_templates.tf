@@ -64,3 +64,4 @@ EOF
     resource_type = "instance"
     tags          = merge(local.common_tags, { Name = local.green_lt_name })
   }
+}
