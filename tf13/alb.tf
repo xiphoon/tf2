@@ -58,10 +58,4 @@ resource "aws_lb_listener" "http" {
         weight           = var.blue_weight
       }
 
-      target_group {
-        target_group_arn = aws_lb_target_group.green.arn
-        weight           = var.green_weight
-      }
-    }
-  }
 }
