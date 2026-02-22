@@ -3,22 +3,12 @@ output "alb_dns_name" {
   value       = aws_lb.alb.dns_name
 }
 
-output "blue_target_group_arn" {
-  description = "ARN of the Blue target group."
-  value       = aws_lb_target_group.blue.arn
-}
-
-output "green_target_group_arn" {
-  description = "ARN of the Green target group."
-  value       = aws_lb_target_group.green.arn
-}
-
 output "blue_asg_name" {
-  description = "Name of the Blue Auto Scaling Group."
+  description = "Name of the Blue ASG."
   value       = aws_autoscaling_group.blue.name
 }
 
 output "green_asg_name" {
-  description = "Name of the Green Auto Scaling Group."
+  description = "Name of the Green ASG."
   value       = aws_autoscaling_group.green.name
 }
