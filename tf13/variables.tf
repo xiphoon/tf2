@@ -19,52 +19,50 @@ variable "public_subnet_ids" {
 }
 
 variable "sg_lb_id" {
-  description = "Security Group id to attach to the ALB (allows HTTP)."
+  description = "Security Group id for the ALB."
   type        = string
 }
 
 variable "sg_http_id" {
-  description = "Security Group id to attach to EC2 instances for HTTP access."
+  description = "Security Group id for HTTP access to EC2 instances."
   type        = string
 }
 
 variable "sg_ssh_id" {
-  description = "Security Group id to attach to EC2 instances for SSH access."
+  description = "Security Group id for SSH access to EC2 instances."
   type        = string
 }
 
 variable "key_name" {
-  description = "Optional EC2 key pair name for instance SSH access. Leave empty string if not used."
+  description = "Optional EC2 key pair name for SSH access."
   type        = string
   default     = ""
 }
 
 variable "ami_id" {
-  description = "AMI id to use for launch templates (Linux with httpd available)."
+  description = "AMI id to use for Launch Templates."
   type        = string
 }
 
 variable "instance_type" {
-  description = "Instance type for ASG Launch Templates."
+  description = "EC2 instance type."
   type        = string
   default     = "t3.micro"
 }
 
 variable "min_size" {
-  description = "Minimum size for each Auto Scaling Group."
+  description = "Minimum size for each ASG."
   type        = number
   default     = 1
 }
 
 variable "max_size" {
-  description = "Maximum size for each Auto Scaling Group."
+  description = "Maximum size for each ASG."
   type        = number
   default     = 2
 }
 
 variable "desired_capacity" {
-  description = "Desired capacity for each Auto Scaling Group."
+  description = "Desired capacity for each ASG."
   type        = number
-  default     = 2
-}
 }
