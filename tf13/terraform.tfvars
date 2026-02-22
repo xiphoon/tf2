@@ -5,23 +5,23 @@ region = "us-east-1"
 name_prefix = "cmtr-0iy36mkm"
 
 # Pre-provisioned VPC
-vpc_id = "vpc-09e52461da2cfc7e4"
+vpc_id = "vpc-04a1b214be4a39fa8"
 
 # Public subnets (cmtr-0iy36mkm-public-subnet1 / subnet2)
 public_subnet_ids = [
-  "subnet-044a34decf0f704d1",
-  "subnet-0c48760b1e241410f"
+  "subnet-01cb42480e259f229",
+  "subnet-0193fc2dad01a26f7"
 ]
 
 # Security Groups
 # cmtr-0iy36mkm-sg-lb
-sg_lb_id = "sg-0571b8997e9ed4c99"
+sg_lb_id = "sg-0060cd70e7c577a51"
 
 # cmtr-0iy36mkm-sg-http
-sg_http_id = "sg-00e00d861b72f41a6"
+sg_http_id = "sg-07c2cef5e340e980f"
 
 # cmtr-0iy36mkm-sg-ssh
-sg_ssh_id = "sg-00e00d861b72f41a6"
+sg_ssh_id = "sg-07c2cef5e340e980f"
 
 # AMI (use Amazon Linux 2023 or Amazon Linux 2 in your region)
 ami_id = "ami-0f3caa1cf4417e51b"
