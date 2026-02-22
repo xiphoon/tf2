@@ -66,3 +66,15 @@ variable "desired_capacity" {
   description = "Desired capacity for each ASG."
   type        = number
 }
+
+variable "blue_weight" {
+  description = "Traffic weight for Blue target group."
+  type        = number
+  default     = 100
+}
+
+variable "green_weight" {
+  description = "Traffic weight for Green target group."
+  type        = number
+  default     = 0
+}
