@@ -7,27 +7,25 @@ resource "aws_launch_template" "blue" {
 
   key_name = length(var.key_name) > 0 ? var.key_name : null
 
-  user_data = <<-EOF
-    #!/bin/bash
-    set -e
-    if command -v yum >/dev/null 2>&1; then
-      yum update -y
-      yum install -y httpd
-      systemctl enable httpd
-      cat > /var/www/html/index.html <<HTML
-      <html><body><h1>Blue Environment</h1></body></html>
-      HTML
-      systemctl start httpd
-    elif command -v apt-get >/dev/null 2>&1; then
-      apt-get update -y
-      apt-get install -y apache2
-      systemctl enable apache2
-      cat > /var/www/html/index.html <<HTML
-      <html><body><h1>Blue Environment</h1></body></html>
-      HTML
-      systemctl start apache2
-    fi
-  EOF
+  user_data = base64encode(<<-EOF
+#!/bin/bash
+set -e
+
+if command -v yum >/dev/null 2>&1; then
+  yum update -y
+  yum install -y httpd
+  systemctl enable httpd
+  echo "<html><body><h1>Blue Environment</h1></body></html>" > /var/www/html/index.html
+  systemctl start httpd
+elif command -v apt-get >/dev/null 2>&1; then
+  apt-get update -y
+  apt-get install -y apache2
+  systemctl enable apache2
+  echo "<html><body><h1>Blue Environment</h1></body></html>" > /var/www/html/index.html
+  systemctl start apache2
+fi
+EOF
+  )
 
   tag_specifications {
     resource_type = "instance"
@@ -44,14 +42,20 @@ resource "aws_launch_template" "green" {
 
   key_name = length(var.key_name) > 0 ? var.key_name : null
 
-  user_data = <<-EOF
-    #!/bin/bash
-    set -e
-    if command -v yum >/dev/null 2>&1; then
-      yum update -y
-      yum install -y httpd
-      systemctl enable httpd
-      cat > /var/www/html/index.html <<HTML
-      <html><body><h1>Green Environment</h1></body></html>
-      HTML
+  user_data = base64encode(<<-EOF
+#!/bin/bash
+set -e
+
+if command -v yum >/dev/null 2>&1; then
+  yum update -y
+  yum install -y httpd
+  systemctl enable httpd
+  echo "<html><body><h1>Green Environment</h1></body></html>" > /var/www/html/index.html
+  systemctl start httpd
+elif command -v apt-get >/dev/null 2>&1; then
+  apt-get update -y
+  apt-get install -y apache2
+  systemctl enable apache2
+  echo "<html><body><h1>Green Environment</h1></body></html>" > /var/www/html/index.html
+  systemctl start apache2
 }
