@@ -12,7 +12,7 @@ resource "aws_launch_template" "app" {
     security_groups       = [var.ssh_sg_id, var.private_http_sg_id]
   }
 
-  user_data = <<-EOF
+  user_data = base64encode(<<-EOF
     #!/bin/bash
     set -e
   
@@ -44,6 +44,7 @@ resource "aws_launch_template" "app" {
     </html>
 HTML
 EOF
+)
 
   tag_specifications {
     resource_type = "instance"
