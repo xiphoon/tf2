@@ -109,8 +109,6 @@ resource "aws_autoscaling_group" "app" {
     version = "$Latest"
   }
 
-  target_group_arns = [aws_lb_target_group.app.arn]
-
   lifecycle {
     ignore_changes = [
       target_group_arns,
@@ -125,3 +123,7 @@ resource "aws_autoscaling_group" "app" {
   }
 }
 
+resource "aws_autoscaling_attachment" "asg_tg" {
+  autoscaling_group_name = aws_autoscaling_group.app.name
+  target_group_arn       = aws_lb_target_group.app.arn
+}
