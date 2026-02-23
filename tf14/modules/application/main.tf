@@ -112,8 +112,8 @@ resource "aws_autoscaling_group" "app" {
   # lifecycle: ignore changes to load_balancers and target_group_arns
   lifecycle {
     ignore_changes = [
-      "target_group_arns",
-      "load_balancers",
+      target_group_arns,
+      load_balancers,
     ]
   }
 
