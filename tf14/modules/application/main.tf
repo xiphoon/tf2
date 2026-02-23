@@ -67,10 +67,10 @@ resource "aws_lb" "app" {
 }
 
 resource "aws_lb_target_group" "app" {
-  name     = "${local.name_prefix}-tg"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = var.vpc_id
+  name        = "${local.name_prefix}-tg"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = var.vpc_id
   target_type = "instance"
 
   health_check {
@@ -99,11 +99,11 @@ resource "aws_lb_listener" "http" {
 }
 
 resource "aws_autoscaling_group" "app" {
-  name                      = "${local.name_prefix}-asg"
-  max_size                  = 2
-  min_size                  = 2
-  desired_capacity          = 2
-  vpc_zone_identifier       = var.subnet_ids
+  name                = "${local.name_prefix}-asg"
+  max_size            = 2
+  min_size            = 2
+  desired_capacity    = 2
+  vpc_zone_identifier = var.subnet_ids
 
   launch_template {
     id      = aws_launch_template.app.id

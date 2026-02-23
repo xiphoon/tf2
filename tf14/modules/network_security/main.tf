@@ -3,8 +3,8 @@ locals {
 }
 
 resource "aws_security_group" "ssh" {
-  name   = "${local.name_prefix}-ssh-sg"
-  vpc_id = var.vpc_id
+  name        = "${local.name_prefix}-ssh-sg"
+  vpc_id      = var.vpc_id
   description = "SSH SG"
 
   tags = {
@@ -15,13 +15,13 @@ resource "aws_security_group" "ssh" {
 resource "aws_security_group_rule" "ssh_ingress" {
   for_each = toset(var.allowed_ip)
 
-  type                     = "ingress"
-  from_port                = 22
-  to_port                  = 22
-  protocol                 = "tcp"
-  cidr_blocks              = [each.value]
-  security_group_id        = aws_security_group.ssh.id
-  description              = "Allow SSH from allowed IPs"
+  type              = "ingress"
+  from_port         = 22
+  to_port           = 22
+  protocol          = "tcp"
+  cidr_blocks       = [each.value]
+  security_group_id = aws_security_group.ssh.id
+  description       = "Allow SSH from allowed IPs"
 }
 
 resource "aws_security_group" "public_http" {
