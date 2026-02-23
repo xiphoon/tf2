@@ -4,7 +4,7 @@ locals {
   public_subnets = {
     for idx, az in var.azs :
     az => {
-      cidr = var.public_subnet_cidrs[idx]
+      cidr   = var.public_subnet_cidrs[idx]
       suffix = element(["a", "b", "c"], idx)
     }
   }
