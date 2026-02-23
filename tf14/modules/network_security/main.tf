@@ -22,12 +22,26 @@ resource "aws_security_group_rule" "ssh_ingress" {
   cidr_blocks       = [each.value]
   security_group_id = aws_security_group.ssh.id
   description       = "Allow SSH from allowed IPs"
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 resource "aws_security_group" "public_http" {
   name        = "${local.name_prefix}-public-http-sg"
   vpc_id      = var.vpc_id
   description = "Public HTTP SG"
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
   tags = {
     Name = "${local.name_prefix}-public-http-sg"
@@ -50,6 +64,14 @@ resource "aws_security_group" "private_http" {
   name        = "${local.name_prefix}-private-http-sg"
   vpc_id      = var.vpc_id
   description = "Private HTTP SG for app instances (only allow from public-http SG)"
+  
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   tags = {
     Name = "${local.name_prefix}-private-http-sg"
   }
