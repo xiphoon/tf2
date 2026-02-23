@@ -64,7 +64,7 @@ resource "aws_security_group" "private_http" {
   name        = "${local.name_prefix}-private-http-sg"
   vpc_id      = var.vpc_id
   description = "Private HTTP SG for app instances (only allow from public-http SG)"
-  
+
   egress {
     from_port   = 0
     to_port     = 0
