@@ -15,36 +15,35 @@ resource "aws_launch_template" "app" {
   user_data = <<-EOF
     #!/bin/bash
     set -e
-
-    COMPUTE_MACHINE_UUID=$(cat /sys/devices/virtual/dmi/id/product_uuid | tr '[:upper:]' '[:lower:]' || echo "unknown-uuid")
-
-    # Instance ID metadata - for AWS:
-    if command -v curl >/dev/null 2>&1; then
-      COMPUTE_INSTANCE_ID=$(curl -s --max-time 2 http://169.254.169.254/latest/meta-data/instance-id || echo "unknown-instance")
-    else
-      COMPUTE_INSTANCE_ID="unknown-instance"
-    fi
-
-    cat > /var/www/html/index.html <<HTML
-    <html>
-      <head><title>Instance Info</title></head>
-      <body>
-        <h1>Instance Info</h1>
-        <p>This message was generated on instance ${COMPUTE_INSTANCE_ID} with the following UUID ${COMPUTE_MACHINE_UUID}</p>
-      </body>
-    </html>
-    HTML
-
-    # Simple web server (install and start)
+  
+    # Install web server first
     if command -v yum >/dev/null 2>&1; then
       yum install -y httpd
       systemctl enable --now httpd
+      WEBROOT="/var/www/html"
     elif command -v apt-get >/dev/null 2>&1; then
       apt-get update
       apt-get install -y apache2
       systemctl enable --now apache2
+      WEBROOT="/var/www/html"
+    else
+      WEBROOT="/tmp"
     fi
-  EOF
+  
+    COMPUTE_MACHINE_UUID=$(cat /sys/devices/virtual/dmi/id/product_uuid | tr '[:upper:]' '[:lower:]' || echo "unknown-uuid")
+  
+    COMPUTE_INSTANCE_ID=$(curl -s --max-time 2 http://169.254.169.254/latest/meta-data/instance-id || echo "unknown-instance")
+  
+    cat > $${WEBROOT}/index.html <<HTML
+    <html>
+      <head><title>Instance Info</title></head>
+      <body>
+        <h1>Instance Info</h1>
+        <p>This message was generated on instance $${COMPUTE_INSTANCE_ID} with the following UUID $${COMPUTE_MACHINE_UUID}</p>
+      </body>
+    </html>
+HTML
+EOF
 
   tag_specifications {
     resource_type = "instance"
