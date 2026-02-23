@@ -13,37 +13,47 @@ resource "aws_launch_template" "app" {
   }
 
   user_data = base64encode(<<-EOF
-    #!/bin/bash
-    set -e
+  #!/bin/bash
+  set -e
   
-    # Install web server first
-    if command -v yum >/dev/null 2>&1; then
-      yum install -y httpd
-      systemctl enable --now httpd
-      WEBROOT="/var/www/html"
-    elif command -v apt-get >/dev/null 2>&1; then
-      apt-get update
-      apt-get install -y apache2
-      systemctl enable --now apache2
-      WEBROOT="/var/www/html"
-    else
-      WEBROOT="/tmp"
-    fi
+  # Install Apache
+  if command -v yum >/dev/null 2>&1; then
+    yum update -y
+    yum install -y httpd
+    systemctl enable httpd
+    systemctl start httpd
+    WEBROOT="/var/www/html"
+  elif command -v apt-get >/dev/null 2>&1; then
+    apt-get update -y
+    apt-get install -y apache2
+    systemctl enable apache2
+    systemctl start apache2
+    WEBROOT="/var/www/html"
+  else
+    WEBROOT="/tmp"
+  fi
   
-    COMPUTE_MACHINE_UUID=$(cat /sys/devices/virtual/dmi/id/product_uuid | tr '[:upper:]' '[:lower:]' || echo "unknown-uuid")
+  # Wait for server to be ready
+  sleep 10
   
-    COMPUTE_INSTANCE_ID=$(curl -s --max-time 2 http://169.254.169.254/latest/meta-data/instance-id || echo "unknown-instance")
+  # Get instance metadata
+  COMPUTE_MACHINE_UUID=$(cat /sys/devices/virtual/dmi/id/product_uuid | tr '[:upper:]' '[:lower:]')
+  COMPUTE_INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
   
-    cat > $${WEBROOT}/index.html <<HTML
-    <html>
-      <head><title>Instance Info</title></head>
-      <body>
-        <h1>Instance Info</h1>
-        <p>This message was generated on instance $${COMPUTE_INSTANCE_ID} with the following UUID $${COMPUTE_MACHINE_UUID}</p>
-      </body>
-    </html>
-HTML
-EOF
+  # Write HTML page
+  cat > $${WEBROOT}/index.html <<HTML
+  <html>
+    <head><title>Instance Info</title></head>
+    <body>
+      <h1>Instance Info</h1>
+      <p>This message was generated on instance $${COMPUTE_INSTANCE_ID} with the following UUID $${COMPUTE_MACHINE_UUID}</p>
+    </body>
+  </html>
+  HTML
+  
+  # Ensure proper permissions
+  chmod 644 $${WEBROOT}/index.html
+  EOF
   )
 
   tag_specifications {
