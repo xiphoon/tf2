@@ -1,7 +1,15 @@
 locals {
-  name_prefix    = var.project_prefix
-  public_subnets = zipmap(var.azs, var.public_subnet_cidrs)
+  name_prefix = var.project_prefix
+
+  public_subnets = {
+    for idx, az in var.azs :
+    az => {
+      cidr = var.public_subnet_cidrs[idx]
+      suffix = element(["a", "b", "c"], idx)
+    }
+  }
 }
+
 
 resource "aws_vpc" "this" {
   cidr_block = var.vpc_cidr
@@ -34,12 +42,12 @@ resource "aws_subnet" "public" {
   for_each = local.public_subnets
 
   vpc_id                  = aws_vpc.this.id
-  cidr_block              = each.value
+  cidr_block              = each.value.cidr
   availability_zone       = each.key
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "${local.name_prefix}-subnet-public-${replace(each.key, "/^.+-/", "")}"
+    Name = "${local.name_prefix}-subnet-public-${each.value.suffix}"
   }
 }
 
